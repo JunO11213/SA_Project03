@@ -1,6 +1,6 @@
 #include "unity.h"
 
-// ===== System Test �Լ� ���� ���� =====
+// ===== System Test  =====
 void test_ST01_AllClear_Forward(void);
 void test_ST02_ObstacleFront_TurnLeft(void);
 void test_ST03_AllBlocked_Backward5Ticks(void);
@@ -11,6 +11,8 @@ void test_ST07_NoDust_CleanerON(void);
 void test_ST08_TurnLeftThenForwardSequence(void);
 void test_ST09_ComplexScenario(void);
 void test_ST10_TurnRightSequence(void);
+
+// ===== Unit Test  =====
 void test_UT01_DetermineObstacle_Basic(void);
 
 // ===== Unity Hooks =====
@@ -31,5 +33,6 @@ int main(void)
     RUN_TEST(test_ST08_TurnLeftThenForwardSequence);
     RUN_TEST(test_ST09_ComplexScenario);
     RUN_TEST(test_ST10_TurnRightSequence);
+    printf("\n\n");
     RUN_TEST(test_UT01_DetermineObstacle_Basic);
 }

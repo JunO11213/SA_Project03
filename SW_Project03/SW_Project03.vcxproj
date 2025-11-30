@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="1.c" />
     <ClCompile Include="motor_stub.c" />
+    <ClCompile Include="test_integration.c" />
     <ClCompile Include="test_main.c" />
     <ClCompile Include="test_system.c" />
     <ClCompile Include="test_unit.c" />
