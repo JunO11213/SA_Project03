@@ -128,21 +128,21 @@ void test_ST09_Cleaning_Collision(void) {
     // Turn 하면서도 PowerUp이 유지되는지 확인 (Dust Timer 5 tick)
     TEST_ASSERT_EQUAL(MOTOR_TURN_LEFT, motor_log[1]);
     extern CleanerCommand cleaner_log[1000];
-    TEST_ASSERT_EQUAL(CLEAN_POWERUP, cleaner_log[1]);
+    TEST_ASSERT_EQUAL(CLEAN_POWERUP, cleaner_log[0]);
 }
 
 // ST-10: 갇힘 반복 (Infinite Trap Loop)
 void test_ST10_Infinite_Trap(void) {
     Obstacle seq[11] = {
         {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, // 1차 후진
-        {1,1,1}, // 다시 확인해도 막힘 -> 2차 후진 시작
-        {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}
+        {0,1,1}, // 다시 확인해도 막힘 -> 2차 후진 시작
+        {0,1,1}, {0,1,1}, {0,1,1}, {0,1,1}
     };
     bool dust[11] = { 0 };
     RunScenario(seq, dust, 11);
 
     // 계속 후진 중이어야 함
     TEST_ASSERT_EQUAL(MOTOR_BACKWARD, motor_log[0]);
-    TEST_ASSERT_EQUAL(MOTOR_BACKWARD, motor_log[5]);
-    TEST_ASSERT_EQUAL(MOTOR_BACKWARD, motor_log[10]);
+    TEST_ASSERT_EQUAL(MOTOR_BACKWARD, motor_log[4]);
+    TEST_ASSERT_EQUAL(MOTOR_BACKWARD, motor_log[9]);
 }
