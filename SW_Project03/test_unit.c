@@ -1,113 +1,82 @@
 #include "unity.h"
 #include "rvc.h"
 
-// Stub���� ����ϴ� �ܺ� ����(�α� ����)
 extern MotorCommand motor_log[1000];
 extern CleanerCommand cleaner_log[1000];
-extern int powerup_log[1000];
 extern int tick_index;
 
-// Controller ���� �ʱ�ȭ �Լ�
-//void setUp(void)
-//{
+//void setUp(void) {
 //    Controller_Reset();
 //    tick_index = 0;
 //}
-//
-//void tearDown(void)
-//{
-//}
+//void tearDown(void) {}
 
-// =======================================================
-//  UT01: Determine_Obstacle_Location ���� ���� ����
-// =======================================================
-void test_UT01_DetermineObstacle_Basic(void)
-{
-    Obstacle o = Determine_Obstacle_Location(1, 0, 1);
-    TEST_ASSERT_EQUAL(true, o.IsFront);
-    TEST_ASSERT_EQUAL(false, o.IsLeft);
-    TEST_ASSERT_EQUAL(true, o.IsRight);
+// UT-01: 장애물 위치 구조체 생성 로직 (Front)
+void test_UT01_Determine_Obstacle_Front(void) {
+    Obstacle o = Determine_Obstacle_Location(true, false, false);
+    TEST_ASSERT_TRUE(o.IsFront);
+    TEST_ASSERT_FALSE(o.IsLeft);
+    TEST_ASSERT_FALSE(o.IsRight);
 }
 
-// =======================================================
-//  UT02: Determine_Dust_Existence ���� �Է� Ȯ��
-// =======================================================
-void test_UT02_DetermineDust(void)
-{
-    TEST_ASSERT_EQUAL(true, Determine_Dust_Existence(true));
-    TEST_ASSERT_EQUAL(false, Determine_Dust_Existence(false));
+// UT-02: 장애물 위치 구조체 생성 로직 (All)
+void test_UT02_Determine_Obstacle_All(void) {
+    Obstacle o = Determine_Obstacle_Location(true, true, true);
+    TEST_ASSERT_TRUE(o.IsFront);
+    TEST_ASSERT_TRUE(o.IsLeft);
+    TEST_ASSERT_TRUE(o.IsRight);
 }
 
-// =======================================================
-//  UT03: ��ֹ� ���� �� Controller�� Forward ����
-// =======================================================
-void test_UT03_Controller_NoObstacle_Forward(void)
-{
-    Obstacle o = { 0,0,0 };
-    Controller(o, 0);
+// UT-03: 먼지 존재 여부 반환 로직
+void test_UT03_Determine_Dust_True(void) {
+    TEST_ASSERT_TRUE(Determine_Dust_Existence(true));
+}
 
+// UT-04: 먼지 미존재 여부 반환 로직
+void test_UT04_Determine_Dust_False(void) {
+    TEST_ASSERT_FALSE(Determine_Dust_Existence(false));
+}
+
+// UT-05: [Controller] 장애물 없음 -> 전진 명령 확인
+void test_UT05_Controller_NoObstacle_Forward(void) {
+    Obstacle o = { 0, 0, 0 };
+    Controller(o, false);
     TEST_ASSERT_EQUAL(MOTOR_FORWARD, motor_log[0]);
 }
 
-// =======================================================
-//  UT04: �տ� ��ֹ��� �� TurnLeft ����
-// =======================================================
-void test_UT04_Controller_FrontOnly_TurnLeft(void)
-{
-    Obstacle o = { 1,0,0 };
-    Controller(o, 0);
-
+// UT-06: [Controller] 앞 장애물 감지 -> 좌회전 전이 확인
+void test_UT06_Controller_FrontBlocked_TurnLeft(void) {
+    Obstacle o = { 1, 0, 0 };
+    Controller(o, false);
     TEST_ASSERT_EQUAL(MOTOR_TURN_LEFT, motor_log[0]);
 }
 
-// =======================================================
-//  UT05: �� + ���� �� TurnRight ����
-// =======================================================
-void test_UT05_Controller_FrontLeft_TurnRight(void)
-{
-    Obstacle o = { 1,1,0 };
-    Controller(o, 0);
-
+// UT-07: [Controller] 앞+왼쪽 장애물 -> 우회전 전이 확인 (우선순위)
+void test_UT07_Controller_FrontLeftBlocked_TurnRight(void) {
+    Obstacle o = { 1, 1, 0 };
+    Controller(o, false);
     TEST_ASSERT_EQUAL(MOTOR_TURN_RIGHT, motor_log[0]);
 }
 
-// =======================================================
-//  UT06: ��/��/�� ��� ���� �� Backward ����
-// =======================================================
-void test_UT06_Controller_AllBlocked_Backward(void)
-{
-    Obstacle o = { 1,1,1 };
-    Controller(o, 0);
-
+// UT-08: [Controller] 3면 막힘 -> 후진 전이 확인
+void test_UT08_Controller_AllBlocked_Backward(void) {
+    Obstacle o = { 1, 1, 1 };
+    Controller(o, false);
     TEST_ASSERT_EQUAL(MOTOR_BACKWARD, motor_log[0]);
 }
 
-// =======================================================
-//  UT07: ���� ���� �� CLEAN_POWERUP
-// =======================================================
-void test_UT07_Controller_DustDetected_PowerUp(void)
-{
-    Obstacle o = { 0,0,0 };
-
-    Controller(o, 1);  // ���� ����
-
+// UT-09: [Controller] 전진 중 먼지 감지 -> PowerUp 확인
+void test_UT09_Controller_DustDetected_PowerUp(void) {
+    Obstacle o = { 0, 0, 0 };
+    Controller(o, true); // 먼지 있음
     TEST_ASSERT_EQUAL(CLEAN_POWERUP, cleaner_log[0]);
 }
 
-// =======================================================
-//  UT08: ���� ���� �� CLEAN_ON ����
-// =======================================================
-void test_UT08_Controller_NoDust_CleanerON(void)
-{
-    Obstacle o = { 0,0,0 };
-
-    // 5 tick ��� dust=0 �� powerup ���� �� �� �� CLEAN_ON
-    for (int i = 0; i < 5; i++)
-    {
-        Controller(o, 0);
-        tick_index++;
-    }
-
-    TEST_ASSERT_EQUAL(CLEAN_ON, cleaner_log[4]);
+// UT-10: [Controller] 전진 중이 아닐 때(후진) -> Cleaner OFF 확인
+void test_UT10_Controller_Backward_CleanerOff(void) {
+    // 3면이 막혀서 후진해야 하는 상황
+    Obstacle o = { 1, 1, 1 };
+    Controller(o, true); // 먼지가 있어도
+    TEST_ASSERT_EQUAL(MOTOR_BACKWARD, motor_log[0]);
+    TEST_ASSERT_EQUAL(CLEAN_OFF, cleaner_log[0]); // 후진 중엔 꺼져야 함
 }
-
