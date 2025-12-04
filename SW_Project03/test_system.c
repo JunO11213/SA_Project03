@@ -28,9 +28,9 @@ void test_ST01_Basic_Cruise(void) {
 // ST-02: 단순 장애물 회피 (Front -> Left -> Forward)
 void test_ST02_Simple_Avoidance(void) {
     Obstacle seq[7] = {
-        {1,0,0}, // Trigger Left Turn
-        {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, // Turning
-        {0,0,0}  // Back to Forward
+        {1,0,0}, // 앞에 장애물 존재
+        {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, //도는 동안 장애물 미감지
+        {0,0,0}  //  이 순간부터 전진으로 돌아가야함 
     };
     bool dust[7] = { 0 };
     RunScenario(seq, dust, 7);
@@ -38,12 +38,12 @@ void test_ST02_Simple_Avoidance(void) {
     TEST_ASSERT_EQUAL(MOTOR_FORWARD, motor_log[6]);
 }
 
-// ST-03: 막다른 길 탈출 (Dead End: Front+Left -> Right -> Forward)
+// ST-03: 막다른 길 탈출 
 void test_ST03_DeadEnd_Escape(void) {
     Obstacle seq[7] = {
-        {1,1,0}, // Trigger Right Turn
-        {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, // Turning
-        {0,0,0}  // Forward
+        {1,1,0}, // 우회전 상황
+        {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, // 도는 동안 장애물 미감지
+        {0,0,0}  //  이 순간부터 전진으로 돌아가야함 
     };
     bool dust[7] = { 0 };
     RunScenario(seq, dust, 7);
@@ -51,7 +51,7 @@ void test_ST03_DeadEnd_Escape(void) {
     TEST_ASSERT_EQUAL(MOTOR_FORWARD, motor_log[6]);
 }
 
-// ST-04: 구석 갇힘 및 후진 (Trapped in Corner)
+// ST-04: 구석 갇힘 및 후진
 void test_ST04_Corner_Trap(void) {
     Obstacle seq[5] = { {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1} };
     bool dust[5] = { 0 };
@@ -59,13 +59,13 @@ void test_ST04_Corner_Trap(void) {
     TEST_ASSERT_EQUAL(MOTOR_BACKWARD, motor_log[4]);
 }
 
-// ST-05: 후진 후 좌회전 탈출 (Back -> Turn Left -> Forward)
+// ST-05: 후진 후 좌회전 탈출 
 void test_ST05_Back_And_Turn_Left(void) {
     Obstacle seq[12] = {
-        {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, // 5 Tick Back
-        {0,0,1}, // Left Open -> Trigger Turn Left
-        {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, // 5 Tick Turning
-        {0,0,0}  // Forward
+        {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, 
+        {0,0,1}, 
+        {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, 
+        {0,0,0}  
     };
     bool dust[12] = { 0 };
     RunScenario(seq, dust, 12);
@@ -74,13 +74,13 @@ void test_ST05_Back_And_Turn_Left(void) {
     TEST_ASSERT_EQUAL(MOTOR_FORWARD, motor_log[11]);
 }
 
-// ST-06: 후진 후 우회전 탈출 (Back -> Turn Right -> Forward)
+// ST-06: 후진 후 우회전 탈출
 void test_ST06_Back_And_Turn_Right(void) {
     Obstacle seq[12] = {
-        {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, // Back
-        {1,1,0}, // Front/Left blocked, Right open -> Trigger Right
-        {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, // Turning
-        {0,0,0} // Forward
+        {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1}, 
+        {1,1,0},
+        {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, 
+        {0,0,0} 
     };
     bool dust[12] = { 0 };
     RunScenario(seq, dust, 12);
@@ -97,7 +97,7 @@ void test_ST07_Dusty_Path(void) {
     TEST_ASSERT_EQUAL(CLEAN_POWERUP, cleaner_log[4]);
 }
 
-// ST-08: 지그재그 장애물 (Left -> Forward -> Left)
+// ST-08: 지그재그 장애물 
 void test_ST08_ZigZag_Obstacles(void) {
     Obstacle seq[13] = {
         {1,0,0}, // Left Turn (1~5)
@@ -115,20 +115,20 @@ void test_ST08_ZigZag_Obstacles(void) {
     TEST_ASSERT_EQUAL(MOTOR_FORWARD, motor_log[12]);
 }
 
-// ST-09: 청소 중 장애물 충돌 (PowerUp -> Turn)
+// ST-09: 청소 중 장애물 충돌 
 void test_ST09_Cleaning_Collision(void) {
     Obstacle seq[6] = {
         {0,0,0}, // Forward + Dust
-        {1,0,0}, // Collision -> Turn Left
-        {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0} // Turning
+        {1,0,0}, // Turn Left
+        {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0} 
     };
     bool dust[6] = { 1, 0, 0, 0, 0, 0 };
     RunScenario(seq, dust, 6);
 
-    // Turn 하면서도 PowerUp이 유지되는지 확인 (Dust Timer 5 tick)
+    // 회전 할때는 클리너가 꺼지는지를 검증함
     TEST_ASSERT_EQUAL(MOTOR_TURN_LEFT, motor_log[1]);
     extern CleanerCommand cleaner_log[1000];
-    TEST_ASSERT_EQUAL(CLEAN_POWERUP, cleaner_log[0]);
+    TEST_ASSERT_EQUAL(CLEAN_OFF, cleaner_log[1]);
 }
 
 // ST-10: 갇힘 반복 (Infinite Trap Loop)

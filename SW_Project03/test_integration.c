@@ -11,7 +11,7 @@ extern int tick_index;
 //}
 //void tearDown(void) {}
 
-// IT-01: ÁÂÈ¸Àü Å¸ÀÌ¸Ó (5 Tick) Á¤È®¼º °ËÁõ
+// IT-01ì¢ŒíšŒì „ íƒ€ì´ë¨¸(5Tick) ì •í™•ì„± ê²€ì¦
 void test_IT01_TurnLeft_Timer_Logic(void) {
     Obstacle trigger = { 1, 0, 0 };
     Obstacle clear = { 0, 0, 0 };
@@ -20,18 +20,18 @@ void test_IT01_TurnLeft_Timer_Logic(void) {
     tick_index++;// Tick 1 (Start)
     TEST_ASSERT_EQUAL(MOTOR_TURN_LEFT, motor_log[0]);
 
-    for (int i = 1; i < 5; i++) { // Tick 2~5 (Maintain)
+    for (int i = 1; i < 5; i++) { // Tick 2~5 ë™ì•ˆ ëª¨í„°ëŠ” ì¢ŒíšŒì „ì„ ìœ ì§€í•´ì•¼í•¨
         Controller(clear, false);
         tick_index++;
         TEST_ASSERT_EQUAL(MOTOR_TURN_LEFT, motor_log[i]);
     }
 
-    Controller(clear, false); // Tick 6 (Finish)
+    Controller(clear, false); // Tick 6ì´ ë˜ë©´ ëª¨í„°ëŠ” ì „ì§„ì„ í•´ì•¼í•¨
     tick_index++;
     TEST_ASSERT_EQUAL(MOTOR_FORWARD, motor_log[5]);
 }
 
-// IT-02: ¿ìÈ¸Àü Å¸ÀÌ¸Ó (5 Tick) Á¤È®¼º °ËÁõ
+//IT-02 ìš°íšŒì „ íƒ€ì´ë¨¸(5Tick) ì •í™•ì„± ê²€ì¦
 void test_IT02_TurnRight_Timer_Logic(void) {
     Obstacle trigger = { 1, 1, 0 };
     Obstacle clear = { 0, 0, 0 };
@@ -49,12 +49,12 @@ void test_IT02_TurnRight_Timer_Logic(void) {
     Controller(clear, false);
     tick_index++;
     TEST_ASSERT_EQUAL(MOTOR_FORWARD, motor_log[5]);
-}
+} //ì¢ŒíšŒì „ ê²€ì¦ê³¼ ë™ì¼í•˜ê²Œ ì‘ì„±í•¨
 
-// IT-03: ÈÄÁø Å¸ÀÌ¸Ó (5 Tick) Á¤È®¼º °ËÁõ
+// IT-03 í›„ì§„ íƒ€ì´ë¨¸(5Tick) ì •í™•ì„± ê²€ì¦
 void test_IT03_Backward_Timer_Logic(void) {
     Obstacle trigger = { 1, 1, 1 };
-    Obstacle clear = { 0, 0, 0 }; // ÈÄÁø Áß¿¡´Â ¼¾¼­°ª ¹«½ÃµÊÀ» È®ÀÎ
+    Obstacle clear = { 0, 0, 0 };  //ë¨¼ì§€ê°€ ê³„ì† ê°ì§€ë˜ì§€ ì•ŠìŒ
 
     Controller(trigger, false);
     tick_index++;
@@ -68,62 +68,63 @@ void test_IT03_Backward_Timer_Logic(void) {
     Controller(clear, false);
     tick_index++;
     TEST_ASSERT_EQUAL(MOTOR_TURN_LEFT, motor_log[5]);
+    //í›„ì§„ í›„ ì¢ŒíšŒì „ì— ìš°ì„ ìˆœìœ„ê°€ ìˆìŒì„ ê²€ì¦í•¨
 }
 
-// IT-04: ¸ÕÁö PowerUp Å¸ÀÌ¸Ó (5 Tick) °ËÁõ
+// IT-04PowerUp íƒ€ì´ë¨¸(5Tick) ê²€ì¦
 void test_IT04_PowerUp_Timer_Logic(void) {
     Obstacle o = { 0, 0, 0 };
 
-    Controller(o, true); // ¸ÕÁö ¹ß°ß
+    Controller(o, true); //ì¥ì• ë¬¼ì€ ì—†ê³  ë¨¼ì§€ê°€ ê°ì§€ëœ ìƒí™© ë¶€ì—¬
     tick_index++;
     TEST_ASSERT_EQUAL(CLEAN_POWERUP, cleaner_log[0]);
 
     for (int i = 1; i < 5; i++) {
-        Controller(o, false); // ¸ÕÁö »ç¶óÁü
+        Controller(o, false); // ì¥ì• ë¬¼ ì—†ê³ , ë¨¼ì§€ëŠ” ê°ì§€ë˜ì§€ ì•Šì€ ìƒí™©
         tick_index++;
         TEST_ASSERT_EQUAL(CLEAN_POWERUP, cleaner_log[i]);
+        // 5 tick ë™ì•ˆ íŒŒì›Œì—… ìœ ì§€í•˜ëŠ” FSM ê²€ì¦
     }
     Controller(o, false);
     tick_index++;
-    TEST_ASSERT_EQUAL(CLEAN_ON, cleaner_log[5]); // º¹±Í
+    TEST_ASSERT_EQUAL(CLEAN_ON, cleaner_log[5]); //ì „ì§„ì¤‘ í´ë¦¬ë„ˆì˜¨ìœ¼ë¡œ ë³µê·€ 
 }
 
-// IT-05: È¸Àü Áß Àå¾Ö¹° ¹«½Ã °ËÁõ (Action Atomic property)
+//IT-05 íšŒì „ ì¤‘ ì„¼ì„œ ì…ë ¥ ë¬´ì‹œ ê²€ì¦ (AtomicAction)
 void test_IT05_Ignore_Sensor_While_Turning(void) {
     Obstacle trigger = { 1, 0, 0 };
-    Obstacle noise = { 1, 1, 1 }; // È¸Àü Áß¿¡ °©ÀÚ±â »ç¹æÀÌ ¸·Èû
+    Obstacle noise = { 1, 1, 1 }; // íšŒì „ì¤‘ ë‹¤ë¥¸ ì„¼ì„œì…ë ¥ì´ ë“¤ì–´ì™€ë„ ë¬´ì‹œí•¨ 
 
-    Controller(trigger, false); // ÁÂÈ¸Àü ½ÃÀÛ
+    Controller(trigger, false); 
     tick_index++;
 
-    // È¸Àü Áß(Tick 2)¿¡ Àå¾Ö¹° ÀÔ·ÂÀÌ µé¾î¿Íµµ È¸Àü »óÅÂ À¯ÁöÇØ¾ß ÇÔ
+    
     Controller(noise, false);
     tick_index++;
     TEST_ASSERT_EQUAL(MOTOR_TURN_LEFT, motor_log[1]);
 }
 
-// IT-06: ÈÄÁø ÈÄ ´Ù½Ã ¸·ÇûÀ» ¶§ ÀçÈÄÁø °ËÁõ
+// IT-06 í›„ì§„ ë°˜ë³µ ë£¨í”„ ë™ì‘ ê²€ì¦
 void test_IT06_Backward_Loop_Logic(void) {
     Obstacle blocked = { 1, 1, 1 };
 
-    // 1È¸Â÷ ÈÄÁø (5 Tick)
+    // ë§‰íŒ ìƒí™©ì—ì„œ ê³„ì† í›„ì§„ í•˜ëŠ” ìƒí™© ê²€ì¦
     for (int i = 0; i < 5; i++) {
         Controller(blocked, false);
         tick_index++;
     }
 
-    // 5 Tick Á¾·á ÈÄ ´Ù½Ã ¼¾¼­ È®ÀÎ -> ¿©ÀüÈ÷ ¸·Èû -> ´Ù½Ã ÈÄÁø ½ÃÀÛ
+    // 5 Tick ë™ì•ˆ í›„ì§„í•¨ì„ ê²€ì¦í•¨ 
     Controller(blocked, false);
     tick_index++;
     TEST_ASSERT_EQUAL(MOTOR_BACKWARD, motor_log[5]);
 }
 
-// IT-07: ÈÄÁø ÈÄ ¿ŞÂÊ ¿­¸² -> ÁÂÈ¸Àü ÀüÀÌ °ËÁõ
+// IT-07 í›„ì§„ í›„ ì¢Œì¸¡ ê°œë°© ì‹œ ì¢ŒíšŒì „ ì „ì´ ê²€ì¦
 void test_IT07_Backward_To_TurnLeft(void) {
     Obstacle blocked = { 1, 1, 1 };
-    Obstacle left_open = { 0, 0, 1 }; // Front(X) Left(O) Right(X) -> ?? 
-    // ÄÚµå ·ÎÁ÷»ó: if (!obs.IsLeft) -> TurnLeft
-    // {0,0,1}Àº Front=0, Left=0, Right=1 ÀÌ¹Ç·Î IsLeft=false -> TurnLeft
+    Obstacle left_open = { 0, 0, 1 }; 
+   
 
     for (int i = 0; i < 5; i++) {
         Controller(blocked, false);
@@ -135,44 +136,42 @@ void test_IT07_Backward_To_TurnLeft(void) {
     TEST_ASSERT_EQUAL(MOTOR_TURN_LEFT, motor_log[5]);
 }
 
-// IT-08: ¸ğÅÍ(È¸Àü)Áß¿¡´Â Å¬¸®³Ê°¡ ²¨Á®¾ßÇÏ´Â Á¶°ÇÀ» °ËÁõÇÔ
+// IT-08 ëª¨í„° íšŒì „ ì¤‘ ì²­ì†Œê¸° ë™ì‹œ ë™ì‘ ì°¨ë‹¨ ê²€ì¦
 void test_IT08_Motor_Cleaner_Concurrency(void) {
-    Obstacle turn = { 1, 0, 0 }; // ÁÂÈ¸Àü Á¶°Ç
+    Obstacle turn = { 1, 0, 0 }; //íšŒì „ì„ í•´ì•¼í•˜ëŠ” ìƒí™©
     bool dust = true;          
 
     Controller(turn, dust);
     tick_index++;
 
     TEST_ASSERT_EQUAL(MOTOR_TURN_LEFT, motor_log[0]);
-    TEST_ASSERT_EQUAL(CLEAN_OFF, cleaner_log[0]);
+    TEST_ASSERT_EQUAL(CLEAN_OFF, cleaner_log[0]); // íšŒì „ ì¤‘ì—ëŠ” í´ë¦¬ë„ˆ ì˜¤í”„ ê²€ì¦
 }
 
-// IT-09: ÆÄ¿ö¾÷ Áß ÈÄÁø ¹ß»ı ½Ã Ã»¼Ò±â OFF ÀüÈ¯ °ËÁõ
+// IT-09PowerUp ìƒíƒœì—ì„œ í›„ì§„ ë°œìƒ ì‹œ ì²­ì†Œê¸° OFF ì „í™˜ ê²€ì¦
 void test_IT09_PowerUp_To_Off_By_Backward(void) {
-    // 1. ¸ÕÁö ¹ß°ß (PowerUp)
     Controller((Obstacle) { 0, 0, 0 }, true);
     tick_index++;
     TEST_ASSERT_EQUAL(CLEAN_POWERUP, cleaner_log[0]);
 
-    // 2. °©ÀÚ±â °¤Èû (Backward) -> Ã»¼Ò±â ²¨Á®¾ß ÇÔ
     Controller((Obstacle) { 1, 1, 1 }, false);
     tick_index++;
     TEST_ASSERT_EQUAL(MOTOR_BACKWARD, motor_log[1]);
     TEST_ASSERT_EQUAL(CLEAN_OFF, cleaner_log[1]);
 }
 
-// IT-10: ¿¬¼Ó ¸ÕÁö °¨Áö ½Ã Å¸ÀÌ¸Ó ¿¬Àå °ËÁõ
+// IT-10 ì—°ì† ë¨¼ì§€ ê°ì§€ ì‹œ PowerUp íƒ€ì´ë¨¸ ì—°ì¥ ê²€ì¦
 void test_IT10_PowerUp_Extension(void) {
     Obstacle o = { 0,0,0 };
 
     Controller(o, true);
-    tick_index++;// Tick 1 (Timer=1)
+    tick_index++;
     Controller(o, false);
-    tick_index++;// Tick 2 (Timer=2)
+    tick_index++;// Tick 2ì—ì„œëŠ” ë¨¼ì§€ê°€ ê°ì§€ë˜ì§€ ì•ŠìŒ 
     Controller(o, true);
-    tick_index++;// Tick 3 (¸ÕÁö Àç¹ß°ß -> Timer=1 ¸®¼ÂµÇ¾î¾ß ÇÔ)
+    tick_index++;// Tick 3ì—ì„œ ë¨¼ì§€ê°€ ë‹¤ì‹œ ê°ì§€ë¨, íƒ€ì´ë¨¸ ë¦¬ì…‹
 
-    // Àç¹ß°ß ½ÃÁ¡ºÎÅÍ ´Ù½Ã 5 Tick µ¿¾È PowerUpÀÌ¾î¾ß ÇÔ
+    // Tick 3 ë¶€í„° 5 tickë™ì•ˆ íŒŒì›Œì—…ì´ ìœ ì§€ ë˜ì–´ì•¼ í•¨ 
     for (int i = 0; i < 5; i++) {
         TEST_ASSERT_EQUAL(CLEAN_POWERUP, cleaner_log[2 + i]);
         Controller(o, false);
