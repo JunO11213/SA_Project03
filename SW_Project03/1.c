@@ -4,18 +4,13 @@
 #include <stdlib.h>
 #include "rvc.h"
 
-// ==========================
-// Constants
-// ==========================
 #define ACTION_DURATION_TICK     5
 #define POWERUP_MAINTAIN_TICK    5
 #define BACKWARD_SPEED           0.2
 #define MAP_SIZE_X               50.0
 #define MAP_SIZE_Y               50.0
 
-// ==========================
-// FSM States and Internal Variables
-// ==========================
+
 typedef enum {
     ST_MOVE_FORWARD = 0,
     ST_MOVE_BACKWARD,
@@ -28,9 +23,7 @@ static RobotState robot = { 0.0, 0.0, NORTH };
 static int no_dust_timer = POWERUP_MAINTAIN_TICK;
 static int action_timer = 0;
 
-// ==========================
-// Sensor Interfaces (real execution)
-// ==========================
+// 이전 과제에서 하드웨어를 대신해 출력으로 실행을 검증하기 위한 입력값 인터페이스, 테스팅에서는 미사용함
 bool FrontSensor_Interface(void)
 {
     return (GetAsyncKeyState(VK_UP) & 0x8000) != 0;
@@ -51,9 +44,6 @@ bool DustSensor_Interface(void)
     return (GetAsyncKeyState(VK_SPACE) & 0x8000) != 0;
 }
 
-// ==========================
-// Determine Functions
-// ==========================
 Obstacle Determine_Obstacle_Location(bool front, bool left, bool right)
 {
     Obstacle o = { front, left, right };
@@ -65,10 +55,8 @@ bool Determine_Dust_Existence(bool dust)
     return dust;
 }
 
-// ==========================
-// Motor & Cleaner Interfaces
-// (When testing, Stub replaces these via USE_STUB)
-// ==========================
+// Motor & Cleaner 인터페이스
+// 테스팅을 진행하는 과정에서는  Stub이 대신하게 된다
 #ifndef USE_STUB
 void Motor_Interface(MotorCommand cmd, RobotState state)
 {
@@ -115,16 +103,13 @@ void Cleaner_Interface(CleanerCommand cmd, int cnt)
 }
 #endif
 
-// ==========================
 // Controller (FSM)
-// ==========================
 void Controller(Obstacle obs, bool dust)
 {
     MotorCommand motor_cmd = MOTOR_FORWARD;
     CleanerCommand cleaner_cmd = CLEAN_OFF;
     int display_powerup = 0;
 
-    // ----- FSM STATE TRANSITION -----
     switch (current_state)
     {
     case ST_MOVE_FORWARD:
@@ -180,7 +165,7 @@ void Controller(Obstacle obs, bool dust)
         break;
     }
 
-    // ===== 이동 처리 =====
+    //이동 처리 
     double next_x = robot.x;
     double next_y = robot.y;
     bool moving = false;
@@ -224,7 +209,7 @@ void Controller(Obstacle obs, bool dust)
         robot.y = next_y;
     }
 
-    // ===== Cleaner FSM =====
+    
     if (current_state == ST_MOVE_FORWARD) {
         if (dust) {
             cleaner_cmd = CLEAN_POWERUP;
@@ -251,9 +236,7 @@ void Controller(Obstacle obs, bool dust)
     Cleaner_Interface(cleaner_cmd, display_powerup);
 }
 
-// ==========================
-// Controller Reset
-// ==========================
+// 테스트마다 결과가 독립적으로 도출되도록 매번 컨트롤러를 초기화 하는 함수를 추가함
 void Controller_Reset(void)
 {
     current_state = ST_MOVE_FORWARD;
@@ -264,9 +247,8 @@ void Controller_Reset(void)
     action_timer = 0;
 }
 
-// ==========================
+
 // 실제 RVC 실행 (테스트 빌드에서는 제외)
-// ==========================
 #ifdef BUILD_RVC_APP
 int main(void)
 {

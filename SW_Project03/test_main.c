@@ -1,6 +1,7 @@
 #include "unity.h"
-#include "rvc.h" // Controller_Reset() ����� ���� �ʿ�
+#include "rvc.h" //컨트롤러 초기화를 위해 필요함 
 
+//각 테스팅 파일에 존재하는 함수를 선언 후 호출하는 방식으로 테스트를 진행 함 
 
 // 1. Unit Tests (test_unit.c)
 extern void test_UT01_Determine_Obstacle_Front(void);
@@ -38,35 +39,28 @@ extern void test_ST08_ZigZag_Obstacles(void);
 extern void test_ST09_Cleaning_Collision(void);
 extern void test_ST10_Infinite_Trap(void);
 
-// ==========================================
-// [�߿�] Unity �ʼ� Hook �Լ�
-// ��� �׽�Ʈ ���� ������ ���������� �����
-// ==========================================
-extern int tick_index; // Stub�� �ε��� �ʱ�ȭ�� ���� �ʿ�
+
+extern int tick_index; // Stub의 인덱스 초기화를 위해 필요함
 
 void setUp(void)
 {
-    // �� �׽�Ʈ���� ��Ʈ�ѷ� ���¿� �α� �ε����� �ʱ�ȭ�ؾ�
-    // ���� �׽�Ʈ�� ����(Side Effect)�� ���� �ʽ��ϴ�.
+    // 매 테스트마다 컨트롤러 상태와 로드 인덱스를 초기화해야 
+    // 이전 테스트의 영향을 받지 않고 독립적인 결과를 얻을 수 있음 
     Controller_Reset();
     tick_index = 0;
 }
 
 void tearDown(void)
 {
-    // �׽�Ʈ ���� �� ���� �۾� (����� �ʿ� ����)
+    // 테스트 종료 후 정리, 이 테스팅 과정에서는 필수가 아님 
 }
 
-// ==========================================
-// ���� ���� �Լ�
-// ==========================================
+// 테스팅 실행 메인 함수 
 int main(void)
 {
-    UNITY_BEGIN(); // �׽�Ʈ ����
+    UNITY_BEGIN(); // 테스트 시작 
 
-    // ------------------------------------
-    // 1. Unit Test ����
-    // ------------------------------------
+    // 1. Unit 테스트 실행
     UnityPrint("--- Running Unit Tests ---");
     UNITY_PRINT_EOL();
 
@@ -81,9 +75,7 @@ int main(void)
     RUN_TEST(test_UT09_Controller_DustDetected_PowerUp);
     RUN_TEST(test_UT10_Controller_Backward_CleanerOff);
 
-    // ------------------------------------
-    // 2. Integration Test ����
-    // ------------------------------------
+    // 2. Integration 테스트 실행
     UnityPrint("--- Running Integration Tests ---");
     UNITY_PRINT_EOL();
 
@@ -98,9 +90,7 @@ int main(void)
     RUN_TEST(test_IT09_PowerUp_To_Off_By_Backward);
     RUN_TEST(test_IT10_PowerUp_Extension);
 
-    // ------------------------------------
-    // 3. System Test ����
-    // ------------------------------------
+    // 3. System 테스트 실행
     UnityPrint("--- Running System Tests ---");
     UNITY_PRINT_EOL();
 
@@ -115,5 +105,5 @@ int main(void)
     RUN_TEST(test_ST09_Cleaning_Collision);
     RUN_TEST(test_ST10_Infinite_Trap);
 
-    return UNITY_END(); // ��� ��� �� ����
+    return UNITY_END(); // 결과 출력 및 Pass, Fail 판정과 통계를 콘솔에 출력함
 }
